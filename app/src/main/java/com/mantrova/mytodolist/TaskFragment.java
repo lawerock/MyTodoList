@@ -18,16 +18,21 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.util.UUID;
+
 /**
  * Created by Таня on 13.02.2015.
  */
 public class TaskFragment extends Fragment {
     Task mTask;
     EditText mTitleField;
+    public static final String EXTRA_CRIME_ID = "com.mantrova.mytodolist.task_id";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UUID taskId = (UUID) getActivity().getIntent().getSerializableExtra(EXTRA_CRIME_ID);
+        mTask = TaskLab.get(getActivity()).getTask(taskId);
         setHasOptionsMenu(true);
     }
 
@@ -47,13 +52,14 @@ public class TaskFragment extends Fragment {
             getActivity().getActionBar().setTitle("New task");
         }
 
-        mTask = new Task();
+        if (mTask == null)
+            mTask = new Task();
         mTitleField = (EditText) v.findViewById(R.id.task_title);
+        mTitleField.setText(mTask.getTitle());
         mTitleField.postDelayed(new Runnable() {
 
             @Override
             public void run() {
-                // TODO Auto-generated method stub
                 InputMethodManager keyboard = (InputMethodManager)
                         getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 keyboard.showSoftInput(mTitleField, 0);

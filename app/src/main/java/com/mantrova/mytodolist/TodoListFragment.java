@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -50,6 +51,14 @@ public class TodoListFragment extends ListFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         ((TaskAdapter)getListAdapter()).notifyDataSetChanged();
+    }
+
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        Task t = ((TaskAdapter)getListAdapter()).getItem(position);
+        // start an instance of CrimePagerActivity
+        Intent i = new Intent(getActivity(), TaskActivity.class);
+        i.putExtra(TaskFragment.EXTRA_CRIME_ID, t.getId());
+        startActivityForResult(i, 0);
     }
 
     @Override

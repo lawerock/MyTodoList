@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.app.FragmentActivity;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by Таня on 13.02.2015.
@@ -22,6 +23,14 @@ public class TaskLab {
         if (sTaskLab==null)
             sTaskLab = new TaskLab(c.getApplicationContext());
         return sTaskLab;
+    }
+
+    public Task getTask(UUID id) {
+        for (Task t : mTasks) {
+            if (t.getId().equals(id))
+                return t;
+        }
+        return null;
     }
 
     public void addTask(Task t){
