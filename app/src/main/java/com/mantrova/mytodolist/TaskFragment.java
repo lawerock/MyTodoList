@@ -76,7 +76,7 @@ public class TaskFragment extends Fragment {
 
         mTitleField.addTextChangedListener(new TextWatcher() {
             public void onTextChanged(CharSequence c, int start, int before, int count) {
-                mTask.setTitle(c.toString());
+             //   mTask.setTitle(c.toString());
             }
 
             public void beforeTextChanged(CharSequence c, int start, int count, int after) {
@@ -97,25 +97,24 @@ public class TaskFragment extends Fragment {
                     NavUtils.navigateUpFromSameTask(getActivity());
                 return true;
             case R.id.menu_item_save_task:
+                mTitleField = (EditText) getActivity().findViewById(R.id.task_title);
+
+                mTask.setTitle(mTitleField.getText().toString());
                 if (mTask.getTitle() != null) {
+                    ContentValues newValues = new ContentValues();
+                    newValues.put(dbHelper.TASK_ID_COLUMN, mTask.getId().toString());
+                    newValues.put(dbHelper.TASK_NAME_COLUMN, mTask.getTitle());
+
                     String Query = "Select * from " + dbHelper.DATABASE_TABLE + " where " + dbHelper.TASK_ID_COLUMN + " = " + "'" + mTask.getId() + "'";
                     Cursor cursor = sdb.rawQuery(Query, null);
                     cursor.getCount();
-                    if(cursor.getCount() <= 0){
+                    if (cursor.getCount() <= 0) {
                         TaskLab.get(getActivity()).addTask(mTask);
-                        ContentValues newValues = new ContentValues();
-                        newValues.put(dbHelper.TASK_ID_COLUMN, mTask.getId().toString());
-                        newValues.put(dbHelper.TASK_NAME_COLUMN, mTask.getTitle());
                         sdb.insert("tasks", null, newValues);
-                    }
-                    else {
-                        ContentValues newValues = new ContentValues();
-                        newValues.put(dbHelper.TASK_ID_COLUMN, mTask.getId().toString());
-                        newValues.put(dbHelper.TASK_NAME_COLUMN, mTask.getTitle());
+                    } else {
                         String where = "task_id" + "=" + "'" + mTask.getId() + "'";
                         sdb.update("tasks", newValues, where, null);
                     }
-
                 }
                 if (NavUtils.getParentActivityIntent(getActivity()) != null)
                     NavUtils.navigateUpFromSameTask(getActivity());
@@ -124,6 +123,15 @@ public class TaskFragment extends Fragment {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+//    public boolean CheckIsDataAlreadyInDB(String TableName, String dbfield, String fieldValue) {
+//        String Query = "Select * from " + dbHelper.DATABASE_TABLE + " where " + dbHelper.TASK_ID_COLUMN + " = " + "'" + mTask.getId() + "'";
+//        Cursor cursor = sdb.rawQuery(Query, null);
+//        cursor.getCount();
+//        if(cursor.getCount() <= 0)
+//            return false;
+//        return true;
+//    }
 
     @Override
     public void onPause() {

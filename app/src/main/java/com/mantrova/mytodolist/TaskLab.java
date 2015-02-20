@@ -62,6 +62,10 @@ public class TaskLab {
         mTasks.add(t);
     }
 
+    public void deleteTask(Task t) {
+        mTasks.remove(t);
+    }
+
     public ArrayList<Task> getTasks() {
         return mTasks;
     }
