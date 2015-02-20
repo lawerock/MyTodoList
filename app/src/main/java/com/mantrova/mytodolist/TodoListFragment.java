@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class TodoListFragment extends ListFragment {
 
-    private ArrayList <Task> mTasks;
+    private ArrayList<Task> mTasks;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,12 +50,11 @@ public class TodoListFragment extends ListFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ((TaskAdapter)getListAdapter()).notifyDataSetChanged();
+        ((TaskAdapter) getListAdapter()).notifyDataSetChanged();
     }
 
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Task t = ((TaskAdapter)getListAdapter()).getItem(position);
-        // start an instance of CrimePagerActivity
+        Task t = ((TaskAdapter) getListAdapter()).getItem(position);
         Intent i = new Intent(getActivity(), TaskActivity.class);
         i.putExtra(TaskFragment.EXTRA_CRIME_ID, t.getId());
         startActivityForResult(i, 0);
@@ -63,11 +62,12 @@ public class TodoListFragment extends ListFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.menu_item_new_task:
+                Task t = new Task();
                 Intent i = new Intent(getActivity(), TaskActivity.class);
-        //        i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
-               startActivityForResult(i, 0);
+                i.putExtra(TaskFragment.EXTRA_CRIME_ID, t.getId());
+                startActivityForResult(i, 0);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -90,7 +90,7 @@ public class TodoListFragment extends ListFragment {
             Task t = getItem(position);
 
             TextView titleTextView =
-                    (TextView)convertView.findViewById(R.id.task_list_item_titleTextView);
+                    (TextView) convertView.findViewById(R.id.task_list_item_titleTextView);
             titleTextView.setText(t.getTitle());
 
             return convertView;

@@ -1,7 +1,10 @@
 package com.mantrova.mytodolist;
 
 import android.annotation.TargetApi;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -27,12 +31,16 @@ public class TaskFragment extends Fragment {
     Task mTask;
     EditText mTitleField;
     public static final String EXTRA_CRIME_ID = "com.mantrova.mytodolist.task_id";
+    DatabaseHelper dbHelper;
+    SQLiteDatabase sdb;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         UUID taskId = (UUID) getActivity().getIntent().getSerializableExtra(EXTRA_CRIME_ID);
         mTask = TaskLab.get(getActivity()).getTask(taskId);
+        dbHelper = new DatabaseHelper(getActivity().getApplicationContext(), "mydatabase.db", null, 1);
+        sdb = dbHelper.getWritableDatabase();
         setHasOptionsMenu(true);
     }
 
@@ -89,13 +97,42 @@ public class TaskFragment extends Fragment {
                     NavUtils.navigateUpFromSameTask(getActivity());
                 return true;
             case R.id.menu_item_save_task:
-                if (mTask.getTitle() != null)
-                    TaskLab.get(getActivity()).addTask(mTask);
+                if (mTask.getTitle() != null) {
+                    String Query = "Select * from " + dbHelper.DATABASE_TABLE + " where " + dbHelper.TASK_ID_COLUMN + " = " + "'" + mTask.getId() + "'";
+                    Cursor cursor = sdb.rawQuery(Query, null);
+                    cursor.getCount();
+                    if(cursor.getCount() <= 0){
+                        TaskLab.get(getActivity()).addTask(mTask);
+                        ContentValues newValues = new ContentValues();
+                        newValues.put(dbHelper.TASK_ID_COLUMN, mTask.getId().toString());
+                        newValues.put(dbHelper.TASK_NAME_COLUMN, mTask.getTitle());
+                        sdb.insert("tasks", null, newValues);
+                    }
+                    else {
+                        ContentValues newValues = new ContentValues();
+                        newValues.put(dbHelper.TASK_ID_COLUMN, mTask.getId().toString());
+                        newValues.put(dbHelper.TASK_NAME_COLUMN, mTask.getTitle());
+                        String where = "task_id" + "=" + "'" + mTask.getId() + "'";
+                        sdb.update("tasks", newValues, where, null);
+                    }
+
+                }
                 if (NavUtils.getParentActivityIntent(getActivity()) != null)
                     NavUtils.navigateUpFromSameTask(getActivity());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+//        ArrayList <Task> tt = TaskLab.get(getActivity()).getTasks();
+//        for (Task t : tt)
+//            System.out.println(t.getTitle());
+//        TaskLab.get(getActivity()).saveTasks(TaskLab.get(getActivity()).getTasks());
+
     }
 }

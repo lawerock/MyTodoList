@@ -10,8 +10,14 @@ public class Task {
     private String mTitle;
     private UUID mId;
 
-    public Task(){
+    public Task() {
         mId = UUID.randomUUID();
+    }
+
+
+    public Task(String id, String title) {
+        mId = UUID.fromString(id);
+        mTitle = title;
     }
 
     public String getTitle() {
@@ -22,7 +28,8 @@ public class Task {
         mTitle = title;
     }
 
-    public UUID getId(){
+    public UUID getId() {
+        //  System.out.println("!!!!!   " + mId);
         return mId;
     }
 }
