@@ -4,3 +4,6 @@
 /.idea/libraries
 .DS_Store
 /build
+/actionbarsherlock/build
+/actionbarsherlock-fest/build
+/actionbarsherlock-i18n/build
