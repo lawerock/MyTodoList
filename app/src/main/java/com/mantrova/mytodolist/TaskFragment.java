@@ -21,13 +21,15 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import com.actionbarsherlock.app.SherlockFragment;
+
 import java.util.ArrayList;
 import java.util.UUID;
 
 /**
  * Created by Таня on 13.02.2015.
  */
-public class TaskFragment extends Fragment {
+public class TaskFragment extends SherlockFragment {
     Task mTask;
     EditText mTitleField;
     public static final String EXTRA_CRIME_ID = "com.mantrova.mytodolist.task_id";
@@ -45,20 +47,20 @@ public class TaskFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_task, menu);
     }
 
-    @TargetApi(11)
+  //  @TargetApi(11)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_task, parent, false);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActivity().getActionBar().setTitle("New task");
-        }
+    //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getSherlockActivity().getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSherlockActivity().getSupportActionBar().setTitle("New task");
+   //     }
 
         if (mTask == null)
             mTask = new Task();
@@ -90,7 +92,7 @@ public class TaskFragment extends Fragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 if (NavUtils.getParentActivityIntent(getActivity()) != null)

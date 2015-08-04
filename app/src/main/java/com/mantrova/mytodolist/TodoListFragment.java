@@ -1,25 +1,24 @@
 package com.mantrova.mytodolist;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
-import android.database.Cursor;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.view.ActionMode;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.SherlockListFragment;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 
 import java.util.ArrayList;
 
@@ -27,11 +26,14 @@ import java.util.ArrayList;
 /**
  * Created by Таня on 13.02.2015.
  */
-public class TodoListFragment extends ListFragment {
+public class TodoListFragment extends SherlockListFragment {
 
     private ArrayList<Task> mTasks;
     DatabaseHelper dbHelper;
     SQLiteDatabase sdb;
+    TaskAdapter adapter;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,62 +51,24 @@ public class TodoListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         super.onCreateView(inflater, parent, savedInstanceState);
         View v = inflater.inflate(R.layout.list_fragment_tasks, parent, false);
-
         ListView listView = (ListView) v.findViewById(android.R.id.list);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
-            registerForContextMenu(listView);
-        else {
-            listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-            listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-                @Override
-                public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-                }
 
-                @TargetApi(11)
-                @Override
-                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                    MenuInflater inflater = mode.getMenuInflater();
-                    inflater.inflate(R.menu.menu_task_context, menu);
-                    return true;
-                }
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
-                @Override
-                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                    return false;
-                }
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("SSSSSSSSSSSSSSSSSSSSSSSSSSSS");
 
-                @Override
-                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                    switch (item.getItemId()){
-                        case R.id.menu_item_delete_task:
-                            TaskAdapter adapter = (TaskAdapter)getListAdapter();
-                            TaskLab taskLab = TaskLab.get(getActivity());
-                            for(int i = adapter.getCount() -1;i>=0;i--){
-                                if (getListView().isItemChecked(i)) {
-                                    sdb.delete("tasks", dbHelper.TASK_ID_COLUMN + " = " + "'" + adapter.getItem(i).getId() + "'", null);
-                                    taskLab.deleteTask(adapter.getItem(i));
-                                }
-                            }
-                            mode.finish();
-                            adapter.notifyDataSetChanged();
-                            return true;
-                        default:
-                            return false;
-                    }
-                }
-
-                @Override
-                public void onDestroyActionMode(ActionMode mode) {
-
-                }
-            });
-        }
+                return false;
+            }
+        });
         return v;
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu, com.actionbarsherlock.view.MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_todo_list, menu);
     }
@@ -119,22 +83,59 @@ public class TodoListFragment extends ListFragment {
         ((TaskAdapter) getListAdapter()).notifyDataSetChanged();
     }
 
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Task t = ((TaskAdapter) getListAdapter()).getItem(position);
-        Intent i = new Intent(getActivity(), TaskActivity.class);
-        i.putExtra(TaskFragment.EXTRA_CRIME_ID, t.getId());
-        startActivityForResult(i, 0);
+    public void onListItemClick(ListView l, View v, final int position, long id) {
+        final TextView titleTextView =
+                (TextView) v.findViewById(R.id.task_list_item_titleTextView);
 
-        //       l = (ListView) v.findViewById(android.R.id.list);
+        getSherlockActivity().startActionMode(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.menu_task_context, menu);
+                return true;
+            }
 
-//        registerForContextMenu(l);
-//        l.showContextMenuForChild(v);
-//        unregisterForContextMenu(l);
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, com.actionbarsherlock.view.MenuItem item) {
+
+                switch (item.getItemId()) {
+                    case R.id.menu_item_delete_task:
+                        adapter = (TaskAdapter) getListAdapter();
+                        TaskLab taskLab = TaskLab.get(getActivity());
+                        for (int i = adapter.getCount() - 1; i >= 0; i--) {
+                            if (getListView().isItemChecked(i)) {
+                                sdb.delete("tasks", dbHelper.TASK_ID_COLUMN + " = " + "'" + adapter.getItem(i).getId() + "'", null);
+                                taskLab.deleteTask(adapter.getItem(i));
+                            }
+                        }
+                        mode.finish();
+                        adapter.notifyDataSetChanged();
+                        return true;
+                    case R.id.menu_item_edit_task:
+                        Task t = ((TaskAdapter) getListAdapter()).getItem(position);
+                        Intent i = new Intent(getActivity(), TaskActivity.class);
+                        i.putExtra(TaskFragment.EXTRA_CRIME_ID, t.getId());
+                        startActivityForResult(i, 0);
+
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+    //            titleTextView.setActivated(false);
+            }
+        });
     }
 
-
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_new_task:
                 Task t = new Task();
@@ -147,22 +148,22 @@ public class TodoListFragment extends ListFragment {
         }
     }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int position = info.position;
-        TaskAdapter adapter = (TaskAdapter) getListAdapter();
-        Task task = adapter.getItem(position);
-
-        switch (item.getItemId()) {
-            case R.id.menu_item_delete_task:
-                TaskLab.get(getActivity()).deleteTask(task);
-                adapter.notifyDataSetChanged();
-                sdb.delete("tasks", dbHelper.TASK_ID_COLUMN + " = " + "'" + task.getId() + "'", null);
-                return true;
-        }
-        return super.onContextItemSelected(item);
-    }
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+//        int position = info.position;
+//        TaskAdapter adapter = (TaskAdapter) getListAdapter();
+//        Task task = adapter.getItem(position);
+//
+//        switch (item.getItemId()) {
+//            case R.id.menu_item_delete_task:
+//                TaskLab.get(getActivity()).deleteTask(task);
+//                adapter.notifyDataSetChanged();
+//                sdb.delete("tasks", dbHelper.TASK_ID_COLUMN + " = " + "'" + task.getId() + "'", null);
+//                return true;
+//        }
+//        return super.onContextItemSelected(item);
+//    }
 
     private class TaskAdapter extends ArrayAdapter<Task> {
         public TaskAdapter(ArrayList<Task> tasks) {

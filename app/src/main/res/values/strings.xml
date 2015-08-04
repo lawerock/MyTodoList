@@ -7,5 +7,7 @@
     <string name="new_task">New task</string>
     <string name="title_activity_task">TaskActivity</string>
     <string name="delete_task">Delete task</string>
+    <string name="edit_task">Edit task</string>
+
 
 </resources>

@@ -1,9 +1,11 @@
 package com.mantrova.mytodolist;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.view.View;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -11,7 +13,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 /**
  * Created by Таня on 13.02.2015.
  */
-public abstract class SingleFragmentActivity extends FragmentActivity {
+public abstract class SingleFragmentActivity extends SherlockFragmentActivity {
     protected abstract Fragment createFragment();
 
     @Override
